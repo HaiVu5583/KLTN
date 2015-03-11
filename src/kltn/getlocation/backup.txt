@@ -1,0 +1,92 @@
+ List<HtmlOption> huyen = ddHuyen.getOptions();
+        for (int i = 1; i < huyen.size(); i++) {
+            HtmlOption ho = huyen.get(i);
+            System.out.println("HO: " + ho.toString());
+            ddHuyen.setSelectedAttribute(ho, true);
+//            synchronized (content) {
+//                content.wait(2000);
+//            }
+            if (!ho.getValueAttribute().equals("0")) {
+                System.out.println("Huyện: " + ho.asText());
+                System.out.println("=============================================");
+
+                DomNodeList<HtmlElement> list = content.getElementsByTagName("table");
+                for (HtmlElement he : list) {
+                    if (!he.asText().equals("")) {
+                        System.out.println(he.asText());
+                        System.out.println("------------------------------");
+                    }
+                }
+
+            }
+        }
+
+
+
+
+//        String hanoiID = hanoi.getValueAttribute();
+//        System.out.println(hanoiID);
+//        System.out.println(huyenID.toString());
+//        HtmlInput viewState = (HtmlInput) page.getElementById("__VIEWSTATE");
+//        HtmlInput viewStateGenerator = (HtmlInput) page.getElementById("__VIEWSTATEGENERATOR");
+//        String _EVENTTARGET = "plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen";
+//        String __SCROLLPOSITIONX = "0";
+//        String __SCROLLPOSITIONY = "0";
+//        String __ASYNCPOST = "true";
+//        String manScript = "plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$UpdatePanel1|plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen";
+//        System.out.println("VIEWSTATE: " + viewState.getValueAttribute());
+//        System.out.println("VIEWSTATEGENERATOR: " + viewStateGenerator.getValueAttribute());
+// Instead of requesting the page directly we create a WebRequestSettings object
+//        WebRequestSettings requestSettings = new WebRequestSettings(
+//                new URL("http://www.bidv.com.vn/chinhanh/ATM.aspx"), HttpMethod.POST);
+// Then we set the request parameters
+//        requestSettings.setRequestParameters(new ArrayList());
+//        requestSettings.getRequestParameters().add(new NameValuePair("manScript", manScript));
+//        requestSettings.getRequestParameters().add(new NameValuePair("lng", "vi-VN"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlTinh", "460"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen", "597"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlXa", "0"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$hddCurrPage", "1"));
+//
+//        requestSettings.getRequestParameters().add(new NameValuePair("__EVENTTARGET", "plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("__VIEWSTATE", viewState.getValueAttribute()));
+//        requestSettings.getRequestParameters().add(new NameValuePair("__VIEWSTATEGENERATOR", viewStateGenerator.getValueAttribute()));
+//        requestSettings.getRequestParameters().add(new NameValuePair("__SCROLLPOSITIONX", "0"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("__SCROLLPOSITIONY", "0"));
+//        requestSettings.getRequestParameters().add(new NameValuePair("__ASYNCPOST", "true"));
+//        Page page2 = web.getPage(requestSettings);
+//        WebRequest request = new WebRequest(new URL("http://www.bidv.com.vn/chinhanh/ATM.aspx"), HttpMethod.POST);
+//        
+//        List<NameValuePair> listParam = new ArrayList<>();
+//        listParam.add(new NameValuePair("manScript", manScript));
+//        listParam.add(new NameValuePair("lng", "vi-VN"));
+//        listParam.add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlTinh", "460"));
+//        listParam.add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen", "598"));
+//        listParam.add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlXa", "0"));
+//        listParam.add(new NameValuePair("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$hddCurrPage", "1"));
+//
+//        listParam.add(new NameValuePair("__EVENTTARGET", "plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen"));
+//        listParam.add(new NameValuePair("__VIEWSTATE", viewState.getValueAttribute()));
+//        listParam.add(new NameValuePair("__VIEWSTATEGENERATOR", viewStateGenerator.getValueAttribute()));
+//        listParam.add(new NameValuePair("__SCROLLPOSITIONX", "0"));
+//        listParam.add(new NameValuePair("__SCROLLPOSITIONY", "0"));
+//        listParam.add(new NameValuePair("__ASYNCPOST", "true"));
+//        request.setRequestParameters(listParam);
+//        HtmlPage page2 = (HtmlPage)web.getPage(request);
+//        System.out.println(page.asText());
+// Finally, we can get the page
+//        Document doc = Jsoup.connect("http://www.bidv.com.vn/chinhanh/ATM.aspx").timeout(10000)
+//                .data("manScript", manScript)
+//                .data("lng", "vi-VN")
+//                .data("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlTinh", "460")
+//                .data("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen", "597")
+//                .data("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlXa", "0")
+//                .data("plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$hddCurrPage", "1")
+//                .data("__EVENTTARGET", "plcRoot$Layout$zoneMenu$PagePlaceholder$PagePlaceholder$Layout$zoneContent$pageplaceholder$pageplaceholder$Layout$zoneContent$DSATM$ddlHuyen")
+//                .data("__VIEWSTATE", viewState.getValueAttribute())
+//                .data("__VIEWSTATEGENERATOR", viewStateGenerator.getValueAttribute())
+//                .data("__SCROLLPOSITIONX", "0")
+//                .data("__SCROLLPOSITIONY", "0")
+//                .data("__ASYNCPOST", "true")
+//                .post();
+//        System.out.println(doc.toString());

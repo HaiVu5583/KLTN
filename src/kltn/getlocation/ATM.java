@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package kltn;
+package kltn.getlocation;
 
 /**
  *
@@ -17,6 +17,8 @@ public class ATM {
     private String province_city;
     private String district;
     private String street;
+    private String phone;
+    private String uniqueCode;
     public ATM() {
         this.bank = "";
         this.address = "";
@@ -25,6 +27,7 @@ public class ATM {
         this.province_city = "";
         this.district = "";
         this.street = "";
+        this.phone = "";
     }
 
     public ATM(String bank, String address, String numOfMachine, String openTime, String province_city, String district, String street) {
@@ -93,6 +96,23 @@ public class ATM {
         this.street = street;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getUniqueCode() {
+        return uniqueCode;
+    }
+
+    public void setUniqueCode(String uniqueCode) {
+        this.uniqueCode = uniqueCode;
+    }
+    
+
     
     public void print(){
         System.out.println("Bank: "+bank);
@@ -102,6 +122,8 @@ public class ATM {
         System.out.println("Province: "+province_city);
         System.out.println("District: "+district);
         System.out.println("Street: "+street);
+        System.out.println("Phone: "+phone);
+        System.out.println("Unique ATM Code: "+uniqueCode);
         System.out.println("-------------------------------------");
     }
     
