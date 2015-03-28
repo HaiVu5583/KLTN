@@ -21,6 +21,7 @@ import java.security.GeneralSecurityException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.script.ScriptException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -37,7 +39,7 @@ import org.jsoup.select.Elements;
  *
  * @author Vu
  */
-public class ATMLocation {
+public class ATMLocationPostGre {
 
     /**
      * @throws java.io.IOException
@@ -92,7 +94,7 @@ public class ATMLocation {
             } else {
                 atm.setOpenTime(e.text());
                 atm.setProvince_city("Hà Nội");
-                atm.setBank("Vietcombank");
+                atm.setBank("vietcombank");
                 atmList.add(atm);
                 atm = new ATM();
             }
@@ -105,9 +107,9 @@ public class ATMLocation {
         System.out.println(Integer.toString(atmList.size()));
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(fullAddress, bank, openTime, numMachine, province_city) VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(fulladdress, bank, opentime, nummachine, province_city) VALUES (?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getAddress());
                 stmt.setString(2, a.getBank());
@@ -186,9 +188,10 @@ public class ATMLocation {
         }
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+//            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(bank, openTime, numMachine, province_city, district, street) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(bank, openTime, nummachine, province_city, district, street) VALUES (?, ?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getBank());
                 stmt.setString(2, a.getOpenTime());
@@ -269,9 +272,10 @@ public class ATMLocation {
         });
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+//            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(fullAddress, bank, numMachine, province_city, district, phone) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(fulladdress, bank, nummachine, province_city, district, phone) VALUES (?, ?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getAddress());
                 stmt.setString(2, a.getBank());
@@ -401,7 +405,7 @@ public class ATMLocation {
             huyenID.add(ho.getValueAttribute());
         }
         int size = huyen.size();
-        for (int i=1; i < size; i++) {
+        for (int i = 1; i < size; i++) {
             HtmlPage page2 = web.getPage(url);
 //        System.out.println(page2.asText());
             HtmlSelect ddTinh2 = page2.getHtmlElementById("plcRoot_Layout_zoneMenu_PagePlaceholder_PagePlaceholder_Layout_zoneContent_pageplaceholder_pageplaceholder_Layout_zoneContent_DSATM_ddlTinh");
@@ -414,7 +418,7 @@ public class ATMLocation {
             HtmlSelect ddHuyen2 = page2.getHtmlElementById("plcRoot_Layout_zoneMenu_PagePlaceholder_PagePlaceholder_Layout_zoneContent_pageplaceholder_pageplaceholder_Layout_zoneContent_DSATM_ddlHuyen");
 //            System.out.println("DDHuyen2: " + ddHuyen2.asXml());
             HtmlOption ho = ddHuyen2.getOption(i);
-            System.out.println("Huyen: "+ ho.asText());
+            System.out.println("Huyen: " + ho.asText());
             String district = ho.asText();
             System.out.println("==========================================================");
 //            System.out.println("HO " + ho.asXml());
@@ -426,29 +430,31 @@ public class ATMLocation {
             HtmlDivision div = (HtmlDivision) page2.getElementById("plcRoot_Layout_zoneMenu_PagePlaceholder_PagePlaceholder_Layout_zoneContent_pageplaceholder_pageplaceholder_Layout_zoneContent_DSATM_UpdatePanel1");
             HtmlDivision content = (HtmlDivision) div.getElementsByAttribute("div", "class", "tim_atm_box").get(1);
             DomNodeList<HtmlElement> atmTables = content.getElementsByTagName("table");
-            for (int j=1; j<atmTables.size();j++){
+            for (int j = 1; j < atmTables.size(); j++) {
                 HtmlElement currentElement = atmTables.get(j);
                 ATM atm = new ATM();
                 atm.setBank("bidv");
                 atm.setProvince_city("Hà Nội");
                 atm.setDistrict(district);
-                String address = currentElement.getElementsByAttribute("td", "class","diadanh_sub11").get(0).asText();
-                String time = currentElement.getElementsByAttribute("td", "class","hoatdong_sub11").get(0).asText();
-                String machineCode = currentElement.getElementsByAttribute("td", "class","hoatdong_sub11").get(1).asText();
+                String address = currentElement.getElementsByAttribute("td", "class", "diadanh_sub11").get(0).asText();
+                String time = currentElement.getElementsByAttribute("td", "class", "hoatdong_sub11").get(0).asText();
+                String machineCode = currentElement.getElementsByAttribute("td", "class", "hoatdong_sub11").get(1).asText();
                 atm.setUniqueCode(machineCode);
                 atm.setStreet(address);
                 atm.setOpenTime(time);
                 atmList.add(atm);
             }
         }
-        for (ATM a:atmList)
+        for (ATM a : atmList) {
             a.print();
+        }
         System.out.println(Integer.toString(atmList.size()));
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+//            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(province_city, district, street, bank, opentime, uniqueCode) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(province_city, district, street, bank, opentime, uniqueCode) VALUES (?, ?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getProvince_city());
                 stmt.setString(2, a.getDistrict());
@@ -470,7 +476,6 @@ public class ATMLocation {
             Logger.getLogger(ATMLocation.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Can't connect");
         }
-
 
     }
 
@@ -521,9 +526,10 @@ public class ATMLocation {
         }
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+//            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(fullAddress, bank, province_city, district) VALUES (?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(fulladdress, bank, province_city, district) VALUES (?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getAddress());
                 stmt.setString(2, a.getBank());
@@ -543,6 +549,42 @@ public class ATMLocation {
             Logger.getLogger(ATMLocation.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Can't connect");
         }
+    }
+
+    public void transferMBATMlocation() {
+
+        try {
+            Connection conMysql = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection conPostgre = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
+            PreparedStatement stmt = conMysql.prepareStatement("SELECT * FROM atm_location WHERE bank = ?");
+            stmt.setString(1, "mbbank");
+            ResultSet rs = stmt.executeQuery();
+            List<ATM> atmList = new ArrayList<>();
+            while (rs.next()) {
+//                System.out.println(rs.getString("province_city"));
+//                System.out.println(rs.getString("fullAddress"));
+//                System.out.println("---------------------------------------------");
+                ATM atm = new ATM();
+                atm.setBank(rs.getString("bank"));
+                atm.setProvince_city(rs.getString("province_city"));
+                atm.setAddress(rs.getString("fullAddress"));
+                atmList.add(atm);
+            }
+            System.out.println(atmList.size());
+            for (ATM a : atmList) {
+                a.print();
+            }
+            PreparedStatement stmt2 = conPostgre.prepareStatement("INSERT INTO \"KLTN\".atm_location(province_city, bank, fulladdress) VALUES(?, ?, ?)");
+            for (ATM a : atmList) {
+                stmt2.setString(1, a.getProvince_city());
+                stmt2.setString(2, a.getBank());
+                stmt2.setString(3, a.getAddress());
+                stmt2.execute();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ATMLocationPostGre.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     public void getSHBATMLocation() throws GeneralSecurityException, IOException {
@@ -610,9 +652,10 @@ public class ATMLocation {
         }
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+//            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO atm_location(fullAddress, bank, province_city, openTime, phone) VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(fulladdress, bank, province_city, opentime, phone) VALUES (?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getAddress());
                 stmt.setString(2, a.getBank());
@@ -645,8 +688,13 @@ public class ATMLocation {
 //    public static void main(String[] args) throws IOException, ScriptException, FailingHttpStatusCodeException, InterruptedException, GeneralSecurityException {
 ////        try {
 //        // TODO code application logic here
-//        ATMLocation atm = new ATMLocation();
-//        atm.getBIDVATMLocation2();
+//        ATMLocationPostGre atm = new ATMLocationPostGre();
+////        atm.getVietcombankATMLocation();
+////        atm.getVietinbankATMLocation();
+////        atm.getAgribankATMLocation();
+////        atm.getBIDVATMLocation2();
+////        atm.transferMBATMlocation();
+////        atm.getTechcombankATMLocation();
 //    }
 
 }
