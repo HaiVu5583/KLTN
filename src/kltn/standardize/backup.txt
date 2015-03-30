@@ -1,0 +1,104 @@
+//        try {
+//            Class.forName("org.postgresql.Driver");
+//        } catch (ClassNotFoundException ex) {
+//            System.err.println("Chưa có POSTGRES DATABASE CONNECTOR");
+//        }
+//        try {
+//            Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
+//            Statement st = con.createStatement();
+//            List<Area> areaList = new ArrayList<>();
+//            ResultSet rs1 = st.executeQuery("SELECT * FROM \"KLTN\".area");
+//
+//            while (rs1.next()) {
+//                Area area = new Area();
+//                area.setProvince(rs1.getString("province"));
+//                area.setDistrict(rs1.getString("district"));
+//                area.setPrecinct(rs1.getString("precinct"));
+//                area.setStreet(rs1.getString("street"));
+//                area.setShortName(rs1.getString("shortname"));
+//                area.setType(rs1.getString("type"));
+//                areaList.add(area);
+//            }
+////            for (Area a : areaList) {
+////                a.print();
+////            }
+//            List<ATM> atmList = new ArrayList<>();
+//            ResultSet rs = st.executeQuery("SELECT * FROM \"KLTN\".atm_location WHERE fulladdress IS NOT NULL");
+//            while (rs.next()) {
+//                ATM atm = new ATM();
+//                atm.setAddress(rs.getString("fulladdress"));
+//                atm.setBank(rs.getString("bank"));
+//                atm.setDistrict(rs.getString("district"));
+//                atm.setNumOfMachine(rs.getString("nummachine"));
+//                atm.setOpenTime(rs.getString("opentime"));
+//                atm.setPhone(rs.getString("phone"));
+//                atm.setProvince_city(rs.getString("province_city"));
+//                atm.setStreet(rs.getString("street"));
+//                atm.setUniqueCode(rs.getString("uniquecode"));
+//                atmList.add(atm);
+//            }
+//            int i = 0;
+//            for (ATM a : atmList) {
+//                String s = a.getAddress();
+//                String[] arr = new String[2];
+//                if ((!s.contains(",") && !s.contains("-")) || (s.contains(",") && s.contains("-"))) {
+//
+//                } else {
+//                    if (s.contains(",") && !s.contains("-")) {
+//                        arr = s.split(",");
+//                    } else if (s.contains("-") && !s.contains(",")) {
+//                        arr = s.split("-");
+//                    }
+//
+//                    String pattern = "((.*)(\\d+)(.*))";
+//                    if (arr.length >= 3) {
+////                        System.out.println("");
+////                        a.print();
+//                        if (checkRegex(arr[arr.length - 1], pattern) && (findNumberPosition(arr[arr.length - 1]) == 0 || findNumberPosition(arr[arr.length - 1]) == 1 || findNumberPosition(arr[arr.length - 1]) == 2)) {
+//                            a.setStreet(s);
+//                            a.print();
+//                        } else if (check(areaList, "1", arr[arr.length - 1].toLowerCase())[0].equals("0") && check(areaList, "2", arr[arr.length - 1].toLowerCase())[0].equals("0")) {
+////                        a.setStreet(s);
+////                        a.print();
+//                        } else if (check(areaList, "1", arr[arr.length - 1].toLowerCase())[0].equals("1") && check(areaList, "2", arr[arr.length - 1].toLowerCase())[0].equals("0")) {
+////                        a.print();
+//                        } else if (check(areaList, "1", arr[arr.length - 1].toLowerCase())[0].equals("1") && check(areaList, "2", arr[arr.length - 2].toLowerCase())[0].equals("2")) {
+//                            if (checkRegex(arr[arr.length - 3], pattern)) {
+//                                a.setStreet(arr[arr.length - 3]);
+//                            } else {
+//                                StringBuilder sb = new StringBuilder();
+//                                for (int j = 0; j <= arr.length - 3; j++) {
+//                                    sb.append(arr[j]);
+//                                    if (j < arr.length - 3) {
+//                                        sb.append(",");
+//                                    }
+//                                }
+//                                a.setStreet(sb.toString());
+//                            }
+//                            a.print();
+//                        }
+//                    } else if (arr.length == 2) {
+//                        System.out.println(s);
+//                        System.out.println(arr[1]);
+//                        if (checkRegex(arr[arr.length - 1], pattern)) {
+//                            a.setStreet(arr[arr.length - 1]);
+//                            a.print();
+//                            i++;
+//                        } else if (check(areaList, "2", arr[arr.length - 1].toLowerCase())[0].equals("2")) {
+//                            a.setStreet(arr[0]);
+//                            a.print();
+//                            i++;
+//                        } else {
+//                            a.setStreet(s);
+//                            a.print();
+//                            i++;
+//                        }
+////                    a.print();
+//                    } else if (arr.length == 1) {
+//                        a.setStreet(s);
+//                        a.print();
+//                        i++;
+//                    }
+//                }
+//            }
+//            System.out.println(i);

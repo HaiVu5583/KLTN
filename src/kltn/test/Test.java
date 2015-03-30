@@ -8,8 +8,10 @@ package kltn.test;
 import java.util.List;
 import kltn.dao.ATMLocationDAO;
 import kltn.dao.AreaDAO;
+import kltn.dao.EssentialWordDAO;
 import kltn.entity.Area;
 import kltn.entity.AtmLocation;
+import kltn.entity.EssentialWord;
 
 /**
  *
@@ -17,8 +19,8 @@ import kltn.entity.AtmLocation;
  */
 public class Test {
 //    public static void main(String[] args) {
-//        AreaDAO dao = new AreaDAO();
-//        List<Area> list = dao.listAll();
+//        EssentialWordDAO dao = new EssentialWordDAO();
+//        List<EssentialWord> list = dao.findByType('5');
 //        System.out.println(list.size());
 //    }
 }
