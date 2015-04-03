@@ -43,9 +43,9 @@ public class AtmLocation implements Serializable {
     @Column(name = "phone")
     private String phone;
     @Column(name = "latd")
-    private String latd;
+    private String latD;
     @Column(name = "longd")
-    private String longd;
+    private String longD;
     @Column(name = "nummachine")
     private Integer nummachine;
     @Column(name = "standardlization")
@@ -57,8 +57,6 @@ public class AtmLocation implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "\"determineLocation\"")
-    private String determineLocation;
 
     public AtmLocation() {
     }
@@ -131,20 +129,20 @@ public class AtmLocation implements Serializable {
         this.phone = phone;
     }
 
-    public String getLatd() {
-        return latd;
+    public String getLatD() {
+        return latD;
     }
 
-    public void setLatd(String latd) {
-        this.latd = latd;
+    public void setLatD(String latD) {
+        this.latD = latD;
     }
 
-    public String getLongd() {
-        return longd;
+    public String getLongD() {
+        return longD;
     }
 
-    public void setLongd(String longd) {
-        this.longd = longd;
+    public void setLongD(String longD) {
+        this.longD = longD;
     }
 
     public Integer getNummachine() {
@@ -178,14 +176,7 @@ public class AtmLocation implements Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
-
-    public String getDetermineLocation() {
-        return determineLocation;
-    }
-
-    public void setDetermineLocation(String determineLocation) {
-        this.determineLocation = determineLocation;
-    }
+    
     public void print(){
         System.out.println("Bank: "+bank);
         System.out.println("Address: "+fulladdress);
@@ -197,7 +188,6 @@ public class AtmLocation implements Serializable {
         System.out.println("Street: "+street);
         System.out.println("Phone: "+phone);
         System.out.println("Unique ATM Code: "+uniquecode);
-        System.out.println("Determine Location: "+determineLocation);
         System.out.println("-------------------------------------");
     }
 

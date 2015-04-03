@@ -44,7 +44,29 @@ public class ATMLocationDAO {
         return list;
     }
 
-    public List<AtmLocation> findByFullAddressNotNull() {
+//    public List<AtmLocation> findByFullAddressNotNull() {
+//        Session session = HibernateUtil.getSessionFactory().openSession();
+//        List<AtmLocation> list = null;
+//        Transaction tx = null;
+//        try {
+//
+//            tx = session.beginTransaction();
+//            Criteria cr = session.createCriteria(AtmLocation.class);
+//            cr.add(Restrictions.isNotNull("fulladdress"));
+////            cr.add(Restrictions.isNotEmpty("fulladdress"));
+//            list = cr.list();
+//            tx.commit();
+//        } catch (HibernateException he) {
+//            if (tx != null && tx.isActive()) {
+//                tx.rollback();
+//            }
+//        } finally {
+//            session.close();
+//        }
+//        return list;
+//    }
+
+    public List<AtmLocation> findByFullAddressAndDistrictNotNull() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<AtmLocation> list = null;
         Transaction tx = null;
@@ -53,7 +75,7 @@ public class ATMLocationDAO {
             tx = session.beginTransaction();
             Criteria cr = session.createCriteria(AtmLocation.class);
             cr.add(Restrictions.isNotNull("fulladdress"));
-//            cr.add(Restrictions.isNotEmpty("fulladdress"));
+            cr.add(Restrictions.isNotNull("district"));
             list = cr.list();
             tx.commit();
         } catch (HibernateException he) {
@@ -66,7 +88,30 @@ public class ATMLocationDAO {
         return list;
     }
 
-    public List<AtmLocation> findByFullAddressAndDistrictNotNull() {
+    public List<AtmLocation> findByFullAddressNull() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<AtmLocation> list = null;
+        Transaction tx = null;
+        try {
+
+            tx = session.beginTransaction();
+            Criteria cr = session.createCriteria(AtmLocation.class);
+            cr.add(Restrictions.isNull("fulladdress"));
+            cr.add(Restrictions.isNotNull("district"));
+            cr.add(Restrictions.isNotNull("street"));
+            list = cr.list();
+            tx.commit();
+        } catch (HibernateException he) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+        } finally {
+            session.close();
+        }
+        return list;
+    }
+
+    public List<AtmLocation> findByFullAddressNotnull() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<AtmLocation> list = null;
         Transaction tx = null;
@@ -75,7 +120,7 @@ public class ATMLocationDAO {
             tx = session.beginTransaction();
             Criteria cr = session.createCriteria(AtmLocation.class);
             cr.add(Restrictions.isNotNull("fulladdress"));
-            cr.add(Restrictions.isNotNull("district"));
+            cr.add(Restrictions.isNull("district"));
             list = cr.list();
             tx.commit();
         } catch (HibernateException he) {

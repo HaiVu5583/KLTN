@@ -6,21 +6,21 @@
 package kltn.test;
 
 import java.util.List;
-import kltn.dao.ATMLocationDAO;
-import kltn.dao.AreaDAO;
-import kltn.dao.EssentialWordDAO;
-import kltn.entity.Area;
-import kltn.entity.AtmLocation;
-import kltn.entity.EssentialWord;
+import kltn.dao.TestDAO;
+import kltn.entity.TestGeo;
 
 /**
  *
  * @author Vu
  */
 public class Test {
-//    public static void main(String[] args) {
+
+    public static void main(String[] args) {
 //        EssentialWordDAO dao = new EssentialWordDAO();
 //        List<EssentialWord> list = dao.findByType('5');
 //        System.out.println(list.size());
-//    }
+        TestDAO test = new TestDAO();
+        List<TestGeo> l = test.listAll();
+        System.out.println(l.get(0).getGeo().toText());
+    }
 }

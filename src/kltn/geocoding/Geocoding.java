@@ -34,23 +34,25 @@ public class Geocoding {
 
 //    public static void main(String[] args) throws IOException, Exception {
 //        
-//        String link = "https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyALCgmmer3Cht-mFQiaJC9yoWdSqvfdAiM";
+//        String link = "https://maps.googleapis.com/maps/api/geocode/json?&key=AIzaSyALCgmmer3Cht-mFQiaJC9yoWdSqvfdAiM";
+//        String address = "hà nội,việt nam";
+//        link = link+"&address="+URLEncoder.encode(address);
+//        System.out.println(link);
 //        URL url = new URL(link);
 //        HttpsURLConnection httpsCon = (HttpsURLConnection) url.openConnection();
 //        InputStream is = httpsCon.getInputStream();
 //        StringWriter writer = new StringWriter();
 //        IOUtils.copy(is, writer, "UTF-8");
-//        System.out.println(writer.toString());
-//        System.out.println(URLEncoder.encode("Vu Long Hai"));
+//        
 //        String jsonString = writer.toString();
-//        JSONParser parse = new JSONParser();
-//        Object obj = parse.parse(jsonString);
-//        JSONObject jsonObject = (JSONObject) obj;
-//        System.out.println(jsonObject.keySet().toString());
-//        JSONArray resultObject = (JSONArray) jsonObject.get("results");
-//        System.out.println(resultObject.toString());
-//        System.out.println(resultObject);
-//        System.out.println(jsonObject.get("status").toString());
-//                
+//        System.out.println(jsonString);
+////        JSONParser parse = new JSONParser();
+////        Object obj = parse.parse(jsonString);
+////        JSONObject jsonObject = (JSONObject) obj;
+////        JSONArray resultArr = (JSONArray) jsonObject.get("results");
+////        Object subObj = parse.parse(resultArr.get(0).toString());
+////        JSONObject resultObject = (JSONObject) subObj;
+////        System.out.println(resultObject.toJSONString());
+////        System.out.println(resultObject.get("types").toString());
 //    }
 }

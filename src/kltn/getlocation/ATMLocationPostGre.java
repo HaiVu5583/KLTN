@@ -693,7 +693,7 @@ public class ATMLocationPostGre {
 ////        atm.getVietinbankATMLocation();
 ////        atm.getAgribankATMLocation();
 ////        atm.getBIDVATMLocation2();
-////        atm.transferMBATMlocation();
+//        atm.transferMBATMlocation();
 ////        atm.getTechcombankATMLocation();
 //    }
 
