@@ -13,6 +13,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -48,6 +49,7 @@ public class EssentialWordDAO {
             tx = session.beginTransaction();
             Criteria cr = session.createCriteria(EssentialWord.class);
             cr.add(Restrictions.eq("type", c));
+            cr.addOrder(Order.asc("id"));
             list = cr.list();
             tx.commit();
         } catch (HibernateException he) {

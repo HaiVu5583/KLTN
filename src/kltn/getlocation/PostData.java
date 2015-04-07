@@ -73,9 +73,6 @@ public class PostData {
 
         public void setVIEWSTATEENCRYPTED(String __VIEWSTATEENCRYPTED) {
             this.__VIEWSTATEENCRYPTED = __VIEWSTATEENCRYPTED;
-        }
-
-       
-        
+        }       
     }
 }

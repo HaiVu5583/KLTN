@@ -43,29 +43,6 @@ public class ATMLocationDAO {
         }
         return list;
     }
-
-//    public List<AtmLocation> findByFullAddressNotNull() {
-//        Session session = HibernateUtil.getSessionFactory().openSession();
-//        List<AtmLocation> list = null;
-//        Transaction tx = null;
-//        try {
-//
-//            tx = session.beginTransaction();
-//            Criteria cr = session.createCriteria(AtmLocation.class);
-//            cr.add(Restrictions.isNotNull("fulladdress"));
-////            cr.add(Restrictions.isNotEmpty("fulladdress"));
-//            list = cr.list();
-//            tx.commit();
-//        } catch (HibernateException he) {
-//            if (tx != null && tx.isActive()) {
-//                tx.rollback();
-//            }
-//        } finally {
-//            session.close();
-//        }
-//        return list;
-//    }
-
     public List<AtmLocation> findByFullAddressAndDistrictNotNull() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<AtmLocation> list = null;
@@ -121,6 +98,27 @@ public class ATMLocationDAO {
             Criteria cr = session.createCriteria(AtmLocation.class);
             cr.add(Restrictions.isNotNull("fulladdress"));
             cr.add(Restrictions.isNull("district"));
+            list = cr.list();
+            tx.commit();
+        } catch (HibernateException he) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+        } finally {
+            session.close();
+        }
+        return list;
+    }
+    
+    public List<AtmLocation> findByStandardlizationStatus(char standardlization){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<AtmLocation> list = null;
+        Transaction tx = null;
+        try {
+
+            tx = session.beginTransaction();
+            Criteria cr = session.createCriteria(AtmLocation.class);
+            cr.add(Restrictions.eq("standardlization", standardlization));
             list = cr.list();
             tx.commit();
         } catch (HibernateException he) {

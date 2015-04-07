@@ -15,7 +15,6 @@ import kltn.dao.EssentialWordDAO;
 import kltn.entity.Area;
 import kltn.entity.AtmLocation;
 import kltn.entity.EssentialWord;
-import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -34,13 +33,13 @@ public class Standardization {
                 if (str.toLowerCase().contains(s.trim())) {
                     if (a.getType() == type && type == '1' && !checkRegex(str.toLowerCase(), "((.*)(\\d+)(.*))")) {
                         result[0] = "1";
-                        result[1] = a.getProvince();
+                        result[1] = a.getProvince().toLowerCase().trim();
                     } else if (a.getType() == type && type == '2' && !checkRegex(str.toLowerCase(), "((.*)(\\d+)(.*))")) {
                         result[0] = "2";
-                        result[1] = a.getDistrict();
+                        result[1] = a.getDistrict().toLowerCase().trim();
                     } else if (a.getType() == type && type == '3' && !checkRegex(str.toLowerCase(), "((.*)(\\d+)(.*))")) {
                         result[0] = "3";
-                        result[1] = a.getPrecinct();
+                        result[1] = a.getPrecinct().toLowerCase().trim();
                     } else if (a.getType() == type && type == '4') {
                         result[0] = "4";
                         result[1] = a.getStreet();
@@ -145,11 +144,15 @@ public class Standardization {
         }
     }
 
-    public static String cutString(String s, String[] sub) {
+    public static String cutString(String s, List<EssentialWord> worldList) {
         String[] arr = s.split(" ");
         StringBuilder sb = new StringBuilder();
         List<String> sub1 = new ArrayList<>();
         List<String> sub2 = new ArrayList<>();
+        List<String> sub = new ArrayList<>();
+        for (EssentialWord ew : worldList) {
+            sub.add(ew.getDisplay().toLowerCase().trim());
+        }
         for (String _sub : sub) {
             if (_sub.length() == 1) {
                 sub1.add(_sub);
@@ -223,9 +226,16 @@ public class Standardization {
     public static boolean isDetermineLocation(String s, List<EssentialWord> list) {
         for (EssentialWord ew : list) {
             String[] arr = ew.getDisplay().split(",");
+            String[] spaceSplit = s.split(" ");
             for (String str : arr) {
-                if (s.toLowerCase().contains(str.trim())) {
-                    return true;
+                if (str.split(" ").length == 1) {
+                    for (String sp:spaceSplit){
+                        if(sp.toLowerCase().trim().equals(str.trim())) return true;
+                    }
+                }else{
+                    if (s.toLowerCase().contains(str.trim())) {
+                        return true;
+                    }
                 }
             }
         }
@@ -236,86 +246,165 @@ public class Standardization {
         return checkRegex(s, "(.)*(\\d+)(.)*");
     }
 
-//    public static void main(String[] args) {
-//        ATMLocationDAO atmDAO = new ATMLocationDAO();
-//        AreaDAO areaDAO = new AreaDAO();
-//        EssentialWordDAO wordDAO = new EssentialWordDAO();
-//        List<AtmLocation> atmList = atmDAO.findByFullAddressAndDistrictNotNull();
-//        List<Area> areaList = areaDAO.listAll();
-//        List<EssentialWord> rejectWord = wordDAO.findByType('5');
-//        List<EssentialWord> determineWord = wordDAO.findByType('1');
+    public static boolean checkPrecinct(String precinct, String district, String province, List<Area> areaList) {
+        for (Area a : areaList) {
+            if (a.getType() == '3' && a.getPrecinct().toLowerCase().trim().equals(precinct.toLowerCase().trim())) {
+                if (district != null) {
+                    if (a.getDistrict().toLowerCase().trim().equals(district.toLowerCase().trim()) && a.getProvince().toLowerCase().trim().equals(province.toLowerCase().trim())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static String replaceShortWriting(String s, List<EssentialWord> worldList) {
+        List<String> list = split(s, " |//,");
+        StringBuilder sb = new StringBuilder();
+        for (String str : list) {
+            System.out.println("sub: " + str);
+            int i = 0;
+            for (EssentialWord ew : worldList) {
+                List<String> sub = split(ew.getDisplay(), ",");
+                for (String _sub : sub) {
+                    if (_sub.toLowerCase().trim().equals(str.toLowerCase().trim())) {
+                        sb.append(ew.getName());
+                        System.out.println(ew.getName() + "-_-");
+                        sb.append(" ");
+                        i++;
+                    }
+                }
+            }
+            if (i == 0) {
+                sb.append(str);
+                sb.append(" ");
+            }
+        }
+        return sb.toString().trim();
+
+    }
+/*
+    public static void main(String[] args) {
+        ATMLocationDAO atmDAO = new ATMLocationDAO();
+        AreaDAO areaDAO = new AreaDAO();
+        EssentialWordDAO wordDAO = new EssentialWordDAO();
+
+        List<AtmLocation> atmList = atmDAO.findByFullAddressAndDistrictNotNull();
+        List<Area> areaList = areaDAO.listAll();
+        List<EssentialWord> rejectWord = wordDAO.findByType('5');
+        List<EssentialWord> determineWord = wordDAO.findByType('1');
+        List<EssentialWord> wordList = wordDAO.listAll();
+        List<EssentialWord> deleteWord = wordDAO.findByType('7');
+
+        for (AtmLocation atm : atmList) {
+            String s = atm.getFulladdress();
+            StringBuilder exactAddress = new StringBuilder();
+            s = oneSpace(s);
+            List<String> splitStr = split(s, "\\,|\\-|\\(|\\)|\\.|\\;");
+            List<String> exactAddressList = new ArrayList<>();
+            for (int i = splitStr.size() - 1; i >= 0; i--) {
+                String element = splitStr.get(i).toLowerCase().trim();
+                if (!isNotAddress(element, rejectWord)) {
+
+                    if (check(areaList, '1', element)[0].equals("1")) {
+                        atm.setProvinceCity(check(areaList, '1', element)[1]);
+
+                    }
+                    if (check(areaList, '2', element)[0].equals("2")) {
+
+                        atm.setDistrict(check(areaList, '2', element)[1]);
+
+                    }
+
+                    if (check(areaList, '3', element)[0].equals("3")) {
+
+                        String precinct = check(areaList, '3', element)[1];
+
+                        if (checkPrecinct(precinct, atm.getDistrict(), atm.getProvinceCity(), areaList)) {
+                            atm.setPrecinct(precinct);
+
+                        }
+
+                    }
+
+                    if (isExactAddress(element) && !isDetermineLocation(element, determineWord)) {
+//                    exactAddress.append(element + ",");
+                        exactAddressList.add(element);
+
+                    } else if (isDetermineLocation(element, determineWord)) {
+                        atm.setDetermineLocation(element);
+                    }
+                }
+            }
+            for (int i = exactAddressList.size() - 1; i >= 0; i--) {
+                exactAddress.append(exactAddressList.get(i));
+                if (i > 0) {
+                    exactAddress.append(",");
+                }
+            }
+            atm.setStreet(exactAddress.toString());
+            if (exactAddressList.size() == 1) {
+                atm.setStandardlization('1');
+            } else {
+                atm.setStandardlization('2');
+            }
+            if (atm.getPrecinct() != null && atm.getPrecinct().equals(atm.getDistrict())) {
+                atm.setStandardlization('2');
+            }
+        }
+        for (AtmLocation atm: atmList) {
+            if (atm.getStreet() != null && !atm.getStreet().isEmpty()) {
+                atm.setStreet(cutString(atm.getStreet(), deleteWord));
+            }
+        }
+
+        atmDAO.updateAll(atmList);
+        for (AtmLocation atm : atmList) {
+            atm.print();
+        }
+
+        List<String> strL = split("34 Tô Hiệu. P. Nguyễn Trãi", "\\,|\\-|\\(|\\)|\\.|\\;");
+        for (int i = strL.size() - 1; i >= 0; i--) {
+                System.out.println(strL.get(i));
+        }
+//        List<AtmLocation> atmList2 = atmDAO.findByFullAddressNotnull();
+//        for (AtmLocation atm : atmList2) {
+//            String s = atm.getFulladdress();
+//            StringBuilder exactAddress = new StringBuilder();
+//            s = oneSpace(s);
+//            List<String> splitStr = split(s, "\\,|\\-|\\(|\\)|\\|\\.|/");
+//            List<String> exactAddressList = new ArrayList<>();
+//            for (int i = splitStr.size() - 1; i >= 0; i--) {
+//                String element = splitStr.get(i).toLowerCase().trim();
+//                if (check(areaList, '1', element)[0].equals("1")) {
+//                    atm.setProvinceCity(check(areaList, '1', element)[1]);
+//                }
+//                if (check(areaList, '2', element)[0].equals("2")) {
+//                    atm.setDistrict(check(areaList, '2', element)[1]);
+//                }
+//                if (check(areaList, '3', element)[0].equals("3")) {
+//                    atm.setPrecinct(check(areaList, '3', element)[1]);
+//                }
 //
-//////        for (AtmLocation atm : atmList) {
-//////            String s = atm.getFulladdress();
-//////            StringBuilder exactAddress = new StringBuilder();
-//////            s = oneSpace(s);
-//////            List<String> splitStr = split(s, "\\,|\\-|\\(|\\)|\\|\\.");
-//////            List<String> exactAddressList = new ArrayList<>();
-//////            for (int i = splitStr.size() - 1; i >= 0; i--) {
-//////                String element = splitStr.get(i).toLowerCase().trim();
-//////                if (check(areaList, '1', element)[0].equals("1") && element.length()-check(areaList, '1', element)[1].length()<15 &&isNotAddress(element, rejectWord)) {
-//////                    atm.setProvinceCity(check(areaList, '1', element)[1]);
-//////                }
-//////                if (check(areaList, '2', element)[0].equals("2") && element.length()-check(areaList, '1', element)[1].length()<15 &&isNotAddress(element, rejectWord)) {
-//////                    atm.setDistrict(check(areaList, '2', element)[1]);
-//////                }
-//////                if (check(areaList, '3', element)[0].equals("3") && element.length()-check(areaList, '1', element)[1].length()<15 &&isNotAddress(element, rejectWord)) {
-//////                    atm.setPrecinct(check(areaList, '3', element)[1]);
-//////                }
-//////                if (isExactAddress(element) && isNotAddress(element, rejectWord) == false && !isDetermineLocation(element, determineWord)) {
-////////                    exactAddress.append(element + ",");
-//////                    exactAddressList.add(element);
-//////                }else if(isDetermineLocation(element, determineWord)) {
-//////                    atm.setDetermineLocation(element);
-//////                }
-//////            }
-//////            for (int i=exactAddressList.size()-1; i>=0; i--){
-//////                exactAddress.append(exactAddressList.get(i));
-//////                if(i>0) exactAddress.append(",");
-//////            }
-//////            atm.setStreet(exactAddress.toString());
-//////        }
-//////        atmDAO.updateAll(atmList);
-//////        for (AtmLocation atm : atmList) {
-//////            atm.print();
-//////        }
-////        List<AtmLocation> atmList2 = atmDAO.findByFullAddressNotnull();
-////        for (AtmLocation atm : atmList2) {
-////            String s = atm.getFulladdress();
-////            StringBuilder exactAddress = new StringBuilder();
-////            s = oneSpace(s);
-////            List<String> splitStr = split(s, "\\,|\\-|\\(|\\)|\\|\\.|/");
-////            List<String> exactAddressList = new ArrayList<>();
-////            for (int i = splitStr.size() - 1; i >= 0; i--) {
-////                String element = splitStr.get(i).toLowerCase().trim();
-////                if (check(areaList, '1', element)[0].equals("1")) {
-////                    atm.setProvinceCity(check(areaList, '1', element)[1]);
-////                }
-////                if (check(areaList, '2', element)[0].equals("2")) {
-////                    atm.setDistrict(check(areaList, '2', element)[1]);
-////                }
-////                if (check(areaList, '3', element)[0].equals("3")) {
-////                    atm.setPrecinct(check(areaList, '3', element)[1]);
-////                }
-////
-////                if (isExactAddress(element) && !isNotAddress(element, rejectWord) && !isDetermineLocation(element, determineWord)) {
-//////                    exactAddress.append(element + ",");
-////                    exactAddressList.add(element);
-////                } else if (isDetermineLocation(element, determineWord)) {
-////                    atm.setDetermineLocation(element);
-////                }
-////            }
-////            for (int i = exactAddressList.size() - 1; i >= 0; i--) {
-////                exactAddress.append(exactAddressList.get(i));
-////                if (i > 0) {
-////                    exactAddress.append(",");
-////                }
-////            }
-////            atm.setStreet(exactAddress.toString());
-////        }
-////        atmDAO.updateAll(atmList2);
-//        
-//        
+//                if (isExactAddress(element) && !isNotAddress(element, rejectWord) && !isDetermineLocation(element, determineWord)) {
+//                    exactAddressList.add(element);
+//                } else if (isDetermineLocation(element, determineWord)) {
+//                    atm.setDetermineLocation(element);
+//                }
+//            }
+//            for (int i = exactAddressList.size() - 1; i >= 0; i--) {
+//                exactAddress.append(exactAddressList.get(i));
+//                if (i > 0) {
+//                    exactAddress.append(",");
+//                }
+//            }
+//            atm.setStreet(exactAddress.toString());
+//            atm.setStandardlization('1');
+//        }
+//        atmDAO.updateAll(atmList2);
+//    
+//    
 //        List<AtmLocation> atmList3 = atmDAO.findByFullAddressNull();
 //        for (AtmLocation atm : atmList3) {
 //            String s = atm.getStreet();
@@ -336,7 +425,6 @@ public class Standardization {
 //                }
 //
 //                if (isExactAddress(element) && !isNotAddress(element, rejectWord) && !isDetermineLocation(element, determineWord)) {
-////                    exactAddress.append(element + ",");
 //                    exactAddressList.add(element);
 //                } else if (isDetermineLocation(element, determineWord)) {
 //                    atm.setDetermineLocation(element);
@@ -349,11 +437,11 @@ public class Standardization {
 //                }
 //            }
 //            atm.setStreet(exactAddress.toString());
-//
+//            atm.setStandardlization('1');
 //        }
 //        for (AtmLocation atm:atmList3)
 //            atm.print();
 //        atmDAO.updateAll(atmList3);
-//        
-//    }
+    }
+    */
 }

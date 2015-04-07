@@ -5,6 +5,7 @@
  */
 package kltn.entity;
 
+import com.vividsolutions.jts.geom.Geometry;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import org.hibernate.annotations.Type;
 
 /**
  *
@@ -25,6 +27,7 @@ import javax.persistence.Table;
 @NamedQueries({
     @NamedQuery(name = "Area.findAll", query = "SELECT a FROM Area a")})
 public class Area implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Column(name = "province")
     private String province;
@@ -44,6 +47,12 @@ public class Area implements Serializable {
     @Column(name = "id")
     private Integer id;
 
+    @Column(name = "bound")
+    @Type(type = "org.hibernate.spatial.GeometryType")
+    private Geometry bound;
+    
+    @Column(name = "splittype")
+    private String splittype;
     public Area() {
     }
 
@@ -106,13 +115,31 @@ public class Area implements Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
-    public void print(){
-        System.out.println("Province: "+province);
-        System.out.println("District: "+district);
-        System.out.println("Precinct: "+precinct);
-        System.out.println("Street: "+street);
-        System.out.println("Type: "+type);
-        System.out.println("Display: "+shortname);
+
+    public Geometry getBound() {
+        return bound;
+    }
+
+    public void setBound(Geometry bound) {
+        this.bound = bound;
+    }
+
+    public String getSplittype() {
+        return splittype;
+    }
+
+    public void setSplittype(String splittype) {
+        this.splittype = splittype;
+    }
+    
+
+    public void print() {
+        System.out.println("Province: " + province);
+        System.out.println("District: " + district);
+        System.out.println("Precinct: " + precinct);
+        System.out.println("Street: " + street);
+        System.out.println("Type: " + type);
+        System.out.println("Display: " + shortname);
         System.out.println("-------------------------------------------");
     }
 
@@ -140,5 +167,5 @@ public class Area implements Serializable {
     public String toString() {
         return "kltn.entity.Area[ id=" + id + " ]";
     }
-    
+
 }

@@ -169,7 +169,8 @@ public class ATMLocationPostGre {
                         atm.setBank("agribank");
                         atm.setProvince_city("Hà Nội");
                         atm.setDistrict(district);
-                        atm.setStreet(tr.select("td.agri-atm-tbl-name").text());
+//                        atm.setStreet(tr.select("td.agri-atm-tbl-name").text());
+                        atm.setAddress(tr.select("td.agri-atm-tbl-name").text());
                         atm.setOpenTime(tr.select("td.agri-atm-tbl-xem").text());
                         String numMachine = tr.select("td.agri-atm-tbl-time").text();
                         String[] arr = numMachine.split("");
@@ -191,14 +192,15 @@ public class ATMLocationPostGre {
 //            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
             Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(bank, openTime, nummachine, province_city, district, street) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(bank, openTime, nummachine, province_city, district, fulladdress) VALUES (?, ?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getBank());
                 stmt.setString(2, a.getOpenTime());
                 stmt.setInt(3, Integer.parseInt(a.getNumOfMachine()));
                 stmt.setString(4, a.getProvince_city());
                 stmt.setString(5, a.getDistrict());
-                stmt.setString(6, a.getStreet());
+//                stmt.setString(6, a.getStreet());
+                stmt.setString(6, a.getAddress());
                 stmt.execute();
             }
             stmt.close();
@@ -440,7 +442,8 @@ public class ATMLocationPostGre {
                 String time = currentElement.getElementsByAttribute("td", "class", "hoatdong_sub11").get(0).asText();
                 String machineCode = currentElement.getElementsByAttribute("td", "class", "hoatdong_sub11").get(1).asText();
                 atm.setUniqueCode(machineCode);
-                atm.setStreet(address);
+//                atm.setStreet(address);
+                atm.setAddress(address);
                 atm.setOpenTime(time);
                 atmList.add(atm);
             }
@@ -454,11 +457,12 @@ public class ATMLocationPostGre {
 //            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kltn?useUnicode=true&characterEncoding=UTF-8", "root", "");
             Connection con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/KLTN?useUnicode=true&characterEncoding=UTF-8", "postgres", "12345");
 
-            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(province_city, district, street, bank, opentime, uniqueCode) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO \"KLTN\".atm_location(province_city, district, fulladdress, bank, opentime, uniqueCode) VALUES (?, ?, ?, ?, ?, ?)");
             for (ATM a : atmList) {
                 stmt.setString(1, a.getProvince_city());
                 stmt.setString(2, a.getDistrict());
-                stmt.setString(3, a.getStreet());
+//                stmt.setString(3, a.getStreet());
+                stmt.setString(3, a.getAddress());
                 stmt.setString(4, a.getBank());
                 stmt.setString(5, a.getOpenTime());
                 stmt.setString(6, a.getUniqueCode());
@@ -686,15 +690,13 @@ public class ATMLocationPostGre {
     }
 
 //    public static void main(String[] args) throws IOException, ScriptException, FailingHttpStatusCodeException, InterruptedException, GeneralSecurityException {
-////        try {
-//        // TODO code application logic here
 //        ATMLocationPostGre atm = new ATMLocationPostGre();
 ////        atm.getVietcombankATMLocation();
 ////        atm.getVietinbankATMLocation();
-////        atm.getAgribankATMLocation();
-////        atm.getBIDVATMLocation2();
-//        atm.transferMBATMlocation();
+//        atm.getAgribankATMLocation();
+////        atm.transferMBATMlocation();
 ////        atm.getTechcombankATMLocation();
+//        atm.getBIDVATMLocation2();
 //    }
 
 }

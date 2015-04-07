@@ -8,7 +8,6 @@
     <class>kltn.test.EssentialWord</class>
     <class>kltn.test.Area</class>
     <class>kltn.entity.AtmLocation</class>
-    <class>kltn.entity.Area_1</class>
     <class>kltn.entity.TestGeo</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/KLTN"/>
