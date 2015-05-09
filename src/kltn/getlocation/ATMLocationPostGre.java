@@ -10,12 +10,16 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
+import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.Connection;
@@ -30,6 +34,17 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.ScriptException;
+import kltn.dao.ATMLocationDAO;
+import kltn.entity.AtmLocation;
+import kltn.hibernate.HibernateUtil;
+import kltn.utils.Utils;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Restrictions;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -689,14 +704,157 @@ public class ATMLocationPostGre {
         }
     }
 
-//    public static void main(String[] args) throws IOException, ScriptException, FailingHttpStatusCodeException, InterruptedException, GeneralSecurityException {
-//        ATMLocationPostGre atm = new ATMLocationPostGre();
-////        atm.getVietcombankATMLocation();
-////        atm.getVietinbankATMLocation();
-//        atm.getAgribankATMLocation();
-////        atm.transferMBATMlocation();
-////        atm.getTechcombankATMLocation();
-//        atm.getBIDVATMLocation2();
-//    }
+    public void getAcbATAMLocation() throws IOException {
+        String mainUrl = "http://acb.com.vn/wps/portal/Home/atm";
+        Document doc = Jsoup.connect(mainUrl).timeout(10000).get();
+        Element cityList = doc.getElementById("cityId");
+        Elements cities = cityList.children();
+        Element hanoi = null;
+        //
+        for (Element e : cities) {
+            if (e.text().toLowerCase().contains("hà nội")) {
+                hanoi = e;
+            }
+        }
+        String url1 = "http://acb.com.vn/ACBMapPortlet/vn/DistrictSelectBox.jsp";
+        Document doc1 = Jsoup.connect(url1).timeout(10000)
+                .data("cmd", "DISTRICT")
+                .data("cityId", hanoi.val())
+                .get();
+        Elements options = doc1.getElementsByTag("option");
+//        for (Element district:options){
+//            if(!district.val().equals("")){
+//                
+//            }
+//                
+//        }
+        List<AtmLocation> atmList = new ArrayList();
+        for (Element district : options) {
+            if (!district.val().equals("")) {
+//                System.out.println("Quận: " + district.text());
+                String url2 = "http://acb.com.vn/ACBMapPortlet/vn/Process.jsp";
+                Document doc2 = Jsoup.connect(url2)
+                        .data("params[]", "Search")
+                        .data("params[]", "")
+                        .data("params[]", "atm")
+                        .data("params[]", "")
+                        .data("params[]", district.val())
+                        .data("params[]", "")
+                        .data("params[]", hanoi.val())
+                        .timeout(10000).get();
+                if (!doc2.getElementsByClass("wrap-content-search-big").isEmpty()) {
+                    Element table = doc2.getElementsByClass("wrap-content-search-big").first();
+                    Element tbody = table.getElementsByClass("tbody").first();
+                    Elements rows = tbody.getElementsByClass("row");
+                    for (Element row : rows) {
 
+//                        System.out.println(row.getElementsByClass("address").first().text());
+//                        System.out.println(row.getElementsByClass("district").first().text());
+//                        System.out.println(row.getElementsByClass("tel-fax").first().text());
+//                        System.out.println(row.getElementsByClass("hours").first().text());
+//           System.out.println(row.toString());
+//                        System.out.println("========================================");
+                        AtmLocation atm = new AtmLocation();
+                        atm.setProvinceCity("Hà Nội");
+                        atm.setDistrict(district.text());
+                        atm.setFulladdress(row.getElementsByClass("address").first().text());
+                        atm.setOpentime(row.getElementsByClass("hours").first().text());
+                        atm.setBank("acb");
+                        atm.setPhone(row.getElementsByClass("tel-fax").first().text());
+                        atmList.add(atm);
+                    }
+                }
+            }
+        }
+        System.out.println(atmList.size());
+        for (AtmLocation a : atmList) {
+            a.print();
+        }
+        ATMLocationDAO atmDAO = new ATMLocationDAO();
+//        atmDAO.insertAll(atmList);
+    }
+
+    public void getVibAtmLocation() throws IOException, GeneralSecurityException {
+
+        String mainUrl = "https://vib.com.vn/1775-truy-cap-nhanh/1777-diem-giao-dich-may-atm/1793-may-atm.aspx";
+        WebClient web = new WebClient(BrowserVersion.FIREFOX_3_6);
+        web.waitForBackgroundJavaScript(10000);
+        web.setUseInsecureSSL(true);
+        web.setThrowExceptionOnScriptError(false);
+        web.setThrowExceptionOnFailingStatusCode(false);
+        web.setPrintContentOnFailingStatusCode(false);
+        web.setJavaScriptEnabled(true);
+        web.setRedirectEnabled(true);
+
+        HtmlPage page = web.getPage(mainUrl);
+//        HtmlSelect cityList = page.getHtmlElementById("ctl00_ctl00_ContentPlaceHolder1_SiteCenterContent_SecondCategoryHomeTransactionATM_cboCities");
+//        HtmlOption hanoi = cityList.getOptionByText("Hà Nội");
+//        cityList.setSelectedAttribute(hanoi, true);
+//        HtmlSelect districtList = page.getHtmlElementById("ctl00_ctl00_ContentPlaceHolder1_SiteCenterContent_SecondCategoryHomeTransactionATM_cboDistrict");
+//        System.out.println(districtList.asXml());
+        HtmlElement mainPage = page.getElementById("page");
+        HtmlElement midCol = mainPage.getElementsByAttribute("div", "class", "midCol").get(0);
+        HtmlElement paging = midCol.getElementById("ctl00_ctl00_ContentPlaceHolder1_SiteCenterContent_SecondCategoryHomeTransactionATM_PagingControl_ulPaging");
+//        HtmlElement atmData = (HtmlElement) midCol.getElementsByAttribute("div", "class", "atm-title").get(0).getParentNode();
+//        int size = atmData.getElementsByAttribute("div", "class", "atm-title").size();
+//        for(int i=0; i<size; i++){
+//            String atmCode = atmData.getElementsByAttribute("div", "class", "atm-title").get(i).asText();
+//            String address = atmData.getElementsByAttribute("div", "class", "gallery").get(i).asText();
+//            System.out.println("Code: "+atmCode);
+//            System.out.println("Address: "+address);
+//            System.out.println("--------------------------------------------");
+//        }
+        HtmlElement lastPage = paging.getElementsByTagName("li").get(paging.getElementsByTagName("li").size() - 1);
+        HtmlElement lastPageLink = lastPage.getElementsByTagName("a").get(0);
+        String href = lastPageLink.getAttribute("href");
+        int lastPageNum = Integer.parseInt(href.split("=")[1]);
+        System.out.println(lastPageNum);
+        List<AtmLocation> atmList = new ArrayList();
+        for (int num = 1; num < lastPageNum; num++) {
+            HtmlPage page2 = web.getPage(mainUrl + "?p=" + Integer.toString(num));
+            HtmlElement mainPage2 = page.getElementById("page");
+            HtmlElement midCol2 = mainPage2.getElementsByAttribute("div", "class", "midCol").get(0);
+            HtmlElement atmData = (HtmlElement) midCol2.getElementsByAttribute("div", "class", "atm-title").get(0).getParentNode();
+            int size = atmData.getElementsByAttribute("div", "class", "atm-title").size();
+            for (int i = 0; i < size; i++) {
+                String atmCode = atmData.getElementsByAttribute("div", "class", "atm-title").get(i).asText();
+                String address = atmData.getElementsByAttribute("div", "class", "gallery").get(i).asText();
+                AtmLocation atm = new AtmLocation();
+                atm.setUniquecode(atmCode);
+                atm.setFulladdress(address);
+                atm.setProvinceCity("Hà Nội");
+                atm.setBank("vib");
+                atmList.add(atm);
+            }
+
+        }
+        System.out.println(atmList.size());
+        for (AtmLocation a : atmList) {
+            a.print();
+        }
+//        ATMLocationDAO atmDAO = new ATMLocationDAO();
+//        atmDAO.insertAll(atmList);
+    }
+
+    
+/*
+   public static void main(String[] args) throws IOException, ScriptException, FailingHttpStatusCodeException, InterruptedException, GeneralSecurityException {
+//        ATMLocationPostGre atm = new ATMLocationPostGre();
+//        atm.getVietcombankATMLocation();
+//        atm.getVietinbankATMLocation();
+//        atm.getAgribankATMLocation();
+//        atm.transferMBATMlocation();
+//        atm.getTechcombankATMLocation();
+//        atm.getBIDVATMLocation2();
+//        atm.getAcbATAMLocation();
+//        atm.getVibAtmLocation();
+//        Geometry geo1 = wktToGeometry("POINT(20.9843443 105.7939585)");
+//        Geometry geo2 = wktToGeometry("POINT(20.991471 105.802123)");
+//        System.out.println(geo1.toString());
+//        System.out.println(Utils.distance("20.9843443", "105.7939585", "20.991471", "105.802123"));
+        
+        ATMLocationDAO dao = new ATMLocationDAO();
+        dao.find10NeareastATM("21.038921", "105.783889");
+   }
+*/
 }

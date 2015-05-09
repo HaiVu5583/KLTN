@@ -55,7 +55,6 @@ public class Area implements Serializable {
     private String splittype;
     public Area() {
     }
-
     public Area(Integer id) {
         this.id = id;
     }

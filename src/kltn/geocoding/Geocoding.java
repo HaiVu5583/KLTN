@@ -17,8 +17,6 @@ import java.net.URLEncoder;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import kltn.dao.ATMLocationDAO;
-import kltn.dao.AreaDAO;
-import kltn.entity.Area;
 import kltn.entity.AtmLocation;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
@@ -99,6 +97,7 @@ public class Geocoding {
     private static void prinRaw(String s) throws MalformedURLException, IOException {
         String link = "https://maps.googleapis.com/maps/api/geocode/json?&key=AIzaSyALCgmmer3Cht-mFQiaJC9yoWdSqvfdAiM";
         link = link + "&address=" + URLEncoder.encode(s);
+        System.out.println(link);
         URL url = new URL(link);
         HttpsURLConnection httpsCon = (HttpsURLConnection) url.openConnection();
         InputStream is = httpsCon.getInputStream();
@@ -109,6 +108,92 @@ public class Geocoding {
         System.out.println(jsonString);
     }
 
+    public static void prinTest(AtmLocation atm) throws InterruptedException, org.json.simple.parser.ParseException, MalformedURLException, IOException {
+        StringBuilder sb = new StringBuilder();
+        if (atm.getStreet() != null) {
+            sb.append(atm.getStreet());
+            sb.append(",");
+        }
+        if (atm.getPrecinct() != null) {
+            sb.append(atm.getPrecinct());
+            sb.append(",");
+        }
+        if (atm.getDistrict() != null) {
+            sb.append(atm.getDistrict());
+            sb.append(",");
+        }
+        sb.append(atm.getProvinceCity());
+        sb.append(", Viet Nam");
+
+        String link = "https://maps.googleapis.com/maps/api/geocode/json?&key=AIzaSyALCgmmer3Cht-mFQiaJC9yoWdSqvfdAiM";
+        link = link + "&address=" + URLEncoder.encode(sb.toString());
+        URL url = new URL(link);
+        HttpsURLConnection httpsCon = (HttpsURLConnection) url.openConnection();
+        InputStream is = httpsCon.getInputStream();
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(is, writer, "UTF-8");
+
+        String jsonString = writer.toString();
+
+        System.out.println(jsonString);
+        System.out.println("----------------------------------------");
+        JSONParser parse = new JSONParser();
+        Object obj = parse.parse(jsonString);
+        JSONObject jsonObject = (JSONObject) obj;
+        if (!jsonObject.get("status").toString().toLowerCase().trim().equals("over_query_limit")) {
+
+            JSONArray resultArray = (JSONArray) jsonObject.get("results");
+            //                if (resultArray.size() == 1) {
+            int countMatch = 0;
+            for (Object resultO : resultArray) {
+                JSONObject resultObject = (JSONObject) resultO;
+                JSONArray addressArray = (JSONArray) resultObject.get("address_components");
+                String street_number = null;
+                String route = null;
+                String precinct = null;
+                String district = null;
+                String province = null;
+                for (Object addressObj : addressArray) {
+                    JSONObject addressJsonObj = (JSONObject) addressObj;
+                    if (addressJsonObj.get("types") != null) {
+                        if (addressJsonObj.get("types").toString().contains("street_number")) {
+                            street_number = addressJsonObj.get("long_name").toString();
+                        } else if (addressJsonObj.get("types").toString().contains("route")) {
+                            route = addressJsonObj.get("long_name").toString();
+                        } else if (addressJsonObj.get("types").toString().contains("sublocality_level_1")) {
+                            precinct = addressJsonObj.get("long_name").toString();
+                        } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_2")) {
+                            district = addressJsonObj.get("long_name").toString();
+                        } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_1")) {
+                            province = addressJsonObj.get("long_name").toString();
+                        }
+
+                    }
+                }
+                if (street_number != null && route != null) {
+                    if (atm.getFulladdress().toLowerCase().contains(street_number.toLowerCase()) && atm.getFulladdress().toLowerCase().contains(route.toLowerCase())) {
+                        countMatch++;
+//                            JSONArray geoArr = (JSONArray) resultObject.get("geometry");
+                        JSONObject geoJsonObj = (JSONObject) resultObject.get("geometry");
+//                            JSONArray locationArr = (JSONArray) geoJsonObj.get("location");
+                        JSONObject locationJsonObj = (JSONObject) geoJsonObj.get("location");
+                        atm.setLatd(locationJsonObj.get("lat").toString());
+                        atm.setLongd(locationJsonObj.get("lng").toString());
+                    }
+                }
+            }
+            if (countMatch == 0) {
+                atm.setStandardlization('3');
+            }
+            //                }
+            System.out.println("=============================================================================");
+            Thread.sleep(300);
+        } else {
+            System.out.println("Reach API LIMIT");
+
+        }
+        atm.print();
+    }
 //    public static void main(String[] args) throws IOException, Exception {
 //        AreaDAO areaDAO = new AreaDAO();
 //        List<Area> listArea = areaDAO.listAll();
@@ -154,14 +239,13 @@ public class Geocoding {
 //        prinRaw("Đường Nguyễn Hữu Thọ, Bắc Linh Đàm, Đại Kim,Hoàng Mai, Hà Nội, Viet Nam");
 //        prinRaw("đại thịnh, mê linh, hà nội, viet nam");
 //    }
-    public static void main(String[] args) throws IOException, InterruptedException, org.json.simple.parser.ParseException {
 
+    public static void main(String[] args) throws IOException, InterruptedException, org.json.simple.parser.ParseException {
+        /*
         ATMLocationDAO atmDAO = new ATMLocationDAO();
         List<AtmLocation> atmList = atmDAO.findByStandardlizationStatus('1');
-        System.out.println(atmList.size());
-        int count0 = 0;
-        int count1 = 0;
-        int countO = 0;
+        System.out.println(Integer.toString(atmList.size()));
+
         for (AtmLocation atm : atmList) {
             StringBuilder sb = new StringBuilder();
             if (atm.getStreet() != null) {
@@ -188,56 +272,75 @@ public class Geocoding {
             IOUtils.copy(is, writer, "UTF-8");
 
             String jsonString = writer.toString();
-            
+
             System.out.println(jsonString);
             System.out.println("----------------------------------------");
             JSONParser parse = new JSONParser();
             Object obj = parse.parse(jsonString);
             JSONObject jsonObject = (JSONObject) obj;
+            if (!jsonObject.get("status").toString().toLowerCase().trim().equals("over_query_limit")) {
 
-            JSONArray resultArray = (JSONArray) jsonObject.get("results");
-            if (resultArray.size() == 1) {
-                System.out.println("Status: "+jsonObject.get("status").toString());
-                JSONObject resultObject = (JSONObject) resultArray.get(0);
-                JSONArray addressArray = (JSONArray) resultObject.get("address_components");
-                String street_number = null;
-                String route = null;
-                String precinct = null;
-                String district = null;
-                String province = null;
-                for (Object addressObj : addressArray) {
-                    JSONObject addressJsonObj = (JSONObject) addressObj;
-                    if (addressJsonObj.get("types") != null) {
-                        if (addressJsonObj.get("types").toString().contains("street_number")) {
-                            street_number = addressJsonObj.get("long_name").toString();
-                        } else if (addressJsonObj.get("types").toString().contains("route")) {
-                            route = addressJsonObj.get("long_name").toString();
-                        } else if (addressJsonObj.get("types").toString().contains("sublocality_level_1")) {
-                            precinct = addressJsonObj.get("long_name").toString();
-                        } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_2")) {
-                            district = addressJsonObj.get("long_name").toString();
-                        } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_1")) {
-                            province = addressJsonObj.get("long_name").toString();
+                JSONArray resultArray = (JSONArray) jsonObject.get("results");
+                //                if (resultArray.size() == 1) {
+                int countMatch = 0;
+                for (Object resultO : resultArray) {
+                    JSONObject resultObject = (JSONObject) resultO;
+                    JSONArray addressArray = (JSONArray) resultObject.get("address_components");
+                    String street_number = null;
+                    String route = null;
+                    String precinct = null;
+                    String district = null;
+                    String province = null;
+                    for (Object addressObj : addressArray) {
+                        JSONObject addressJsonObj = (JSONObject) addressObj;
+                        if (addressJsonObj.get("types") != null) {
+                            if (addressJsonObj.get("types").toString().contains("street_number")) {
+                                street_number = addressJsonObj.get("long_name").toString();
+                            } else if (addressJsonObj.get("types").toString().contains("route")) {
+                                route = addressJsonObj.get("long_name").toString();
+                            } else if (addressJsonObj.get("types").toString().contains("sublocality_level_1")) {
+                                precinct = addressJsonObj.get("long_name").toString();
+                            } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_2")) {
+                                district = addressJsonObj.get("long_name").toString();
+                            } else if (addressJsonObj.get("types").toString().contains("administrative_area_level_1")) {
+                                province = addressJsonObj.get("long_name").toString();
+                            }
+
                         }
-
+                    }
+                    if (street_number != null && route != null) {
+                        if (atm.getFulladdress().toLowerCase().contains(street_number.toLowerCase()) && atm.getFulladdress().toLowerCase().contains(route.toLowerCase())) {
+                            countMatch++;
+                            JSONObject geoJsonObj = (JSONObject) resultObject.get("geometry");
+                            JSONObject locationJsonObj = (JSONObject) geoJsonObj.get("location");
+                            atm.setLatd(locationJsonObj.get("lat").toString());
+                            atm.setLongd(locationJsonObj.get("lng").toString());
+                        }
                     }
                 }
-                System.out.println(sb.toString());
-                System.out.println("------------------------------");
-                System.out.println(street_number + " " + route + ", " + precinct + ", " + district + ", " + province);
-
-            } else if (resultArray.size() == 0) {
-                count0++;
+                if (countMatch == 0) {
+                    atm.setStandardlization('3');
+                }
+                //                }
+                System.out.println("=============================================================================");
+                Thread.sleep(300);
             } else {
-                countO++;
-            }
-            System.out.println("=============================================================================");
-            Thread.sleep(300);
-        }
-        System.out.println("Count 1: " + Integer.toString(count1));
-        System.out.println("Count 0: " + Integer.toString(count0));
-        System.out.println("Count Other: " + Integer.toString(countO));
+                System.out.println("Reach API LIMIT");
+                break;
 
-        prinRaw("44 lý thường kiệt,Hoàn Kiếm,Hà Nội, Viet Nam");
+            }
+        }
+        atmDAO.updateAll(atmList);
+        */
+        AtmLocation atm = new AtmLocation();
+        atm.setFulladdress("E6 Quỳnh Mai, Hai Bà Trưng");
+        atm.setProvinceCity("Hà Nội");
+        atm.setDistrict("hai bà trưng");
+        atm.setStreet("e6 quỳnh mai");
+        atm.setStandardlization('1');
+        prinTest(atm);
+                
+//        prinRaw("39 Đào Tấn, Cống Vị, Ba Đình, Hà Nội, Vietnam");
     }
+    
 }

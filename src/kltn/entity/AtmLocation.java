@@ -62,11 +62,25 @@ public class AtmLocation implements Serializable {
 
     public AtmLocation() {
     }
-
-    public AtmLocation(Integer id) {
-        this.id = id;
+    public void copy(AtmLocation atm){
+        this.bank = atm.getBank();
+        this.determineLocation = atm.getDetermineLocation();
+        this.district = atm.getDistrict();
+        this.fulladdress = atm.getFulladdress();
+        this.id = atm.getId();
+        this.latd = atm.getLatd();
+        this.longd = atm.getLongd();
+        this.nummachine = atm.getNummachine();
+        this.opentime = atm.getOpentime();
+        this.phone = atm.getPhone();
+        this.precinct = atm.getPrecinct();
+        this.provinceCity = atm.getProvinceCity();
+        this.standardlization = atm.getStandardlization();
+        this.street = atm.getStreet();
+        this.uniquecode = atm.getUniquecode();
     }
-
+    
+    
     public String getFulladdress() {
         return fulladdress;
     }
@@ -198,6 +212,9 @@ public class AtmLocation implements Serializable {
         System.out.println("Phone: "+phone);
         System.out.println("Unique ATM Code: "+uniquecode);
         System.out.println("Determine Location: "+determineLocation);
+        System.out.println("Lat: "+latd);
+        System.out.println("Long: "+longd);
+//        System.out.println("Type: "+standardlization.toString());
         System.out.println("-------------------------------------");
     }
 
